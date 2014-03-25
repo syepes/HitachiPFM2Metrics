@@ -564,8 +564,6 @@ class HitachiPFM2Graphite {
    */
   void cleanMetricFiles(ArrayList files){
     if (!files) { return }
-
-    Path folder = Paths.get(archive)
     int notDelCount = 0
 
     files.each {

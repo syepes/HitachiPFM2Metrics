@@ -1,5 +1,5 @@
 pfm.metrics = [$/E:\LogFiles\EUD3-PR-MUTHUS0/$,$/E:\LogFiles\EUR3-PR-MUTHUS0/$]
-pfm.metrics_archive = $/E:\LogFiles\archive/$
+pfm.metrics_archive = $/E:\LogFiles\archive/$ // Mode: path=Archive files, null=Delete files
 pfm.ignoreZeroValues = true
 
 
