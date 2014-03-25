@@ -462,42 +462,44 @@ class HitachiPFM2Graphite {
    * @return String with the Normalized Metric Name
    */
   String normalizeMetricName(String mName){
+    Closure filter = { str -> str?.replaceAll(~/[\s\.]/, '')?.replaceAll(~/<|-$/, '')?.replaceAll(~/[()]/, '-')?.trim() }
+
     switch(mName) {
       case ~/(.*)\(MB\/S\).*/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}_MBs"
+        "${filter(m?.group(1))}_MBs"
       break
       case ~/(.*)\(IOPS\).*/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}_IOPS"
+        "${filter(m?.group(1))}_IOPS"
       break
       case ~/(.*)\(%\).*/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}_PCT"
+        "${filter(m?.group(1))}_PCT"
       break
       case ~/(.*)\(microsec.*\).*/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}_us"
+        "${filter(m?.group(1))}_us"
       break
       case ~/(.*)Count\((.*)\).*/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}_${m.group(2)?.trim().replaceAll(~/<|-$/, '')}_CNT"
+        "${filter(m?.group(1))}_${filter(m?.group(2))}_CNT"
       break
       case ~/(.*)Count.*/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}_CNT"
+        "${filter(m?.group(1))}_CNT"
       break
       case ~/(.*)\((.*)\).*/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}_${m.group(2)?.trim()}"
+        "${filter(m?.group(1))}_${filter(m?.group(2))}"
       break
       case ~/(.*)/:
         Matcher m = Matcher.lastMatcher
-        "${m.group(1)?.trim().replaceAll(~/[\s\.]/, '')}"
+        "${filter(m?.group(1))}"
       break
       default:
         log.error "Could not normalize the metric: ${mName}"
-        mName
+        filter(mName)
       break
     }
   }

@@ -39,11 +39,11 @@ class HitachiPFM2GraphiteTest extends Specification{
         setup:
         ArrayList metrics = ['Trans Rate(MB/S)','Read Rate(IOPS)','Usage Rate(%)',
                              'XCOPY Time(microsec)','XCOPY Max Time(microsec.)','Write Job Delay CMD Count(1000ms-)',
-                             'Sequential Read CMD Count','Random Write Trans Size(MB)','Average Tag']
+                             'Sequential Read CMD Count','Random Write Trans Size(MB)','Average Tag','Cache(DRR) Bus Usage Rate(%)']
         when:
         ArrayList metricsNormalized = metrics.collect { main.normalizeMetricName(it) }
         then:
-        metricsNormalized.size() == 9
+        metricsNormalized.size() == 10
 
         metricsNormalized[0] == 'TransRate_MBs'
         metricsNormalized[1] == 'ReadRate_IOPS'
@@ -54,6 +54,7 @@ class HitachiPFM2GraphiteTest extends Specification{
         metricsNormalized[6] == 'SequentialReadCMD_CNT'
         metricsNormalized[7] == 'RandomWriteTransSize_MB'
         metricsNormalized[8] == 'AverageTag'
+        metricsNormalized[9] == 'Cache-DRR-BusUsageRate_PCT'
     }
     def "Test buildMetrics : ignoreZeroValues = false"() {
         when:
