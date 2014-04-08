@@ -5,8 +5,9 @@ pfm.ignoreZeroValues = true
 
 graphite.prefix = 'SAN' // Graphite Metric prefix
 graphite.host = 'eud3-pr-mutgra1.alidaho.com'
-graphite.port = 2003
-graphite.protocol = 'udp'
+graphite.port = 2004
+graphite.protocol = 'tcp'
+graphite.mode = 'pickle'
 
 main.delay = 60 // Seconds
 

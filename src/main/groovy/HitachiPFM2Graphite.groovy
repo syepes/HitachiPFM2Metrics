@@ -22,12 +22,14 @@ import java.nio.file.Paths
 import java.nio.file.Files
 import static java.nio.file.StandardCopyOption.*
 
+import com.allthingsmonitoring.utils.MetricClient
 
 
 @Slf4j
 class HitachiPFM2Graphite {
 
   ConfigObject cfg
+  MetricClient mc
   Map parseCfg = [:]
 
 
@@ -37,6 +39,8 @@ class HitachiPFM2Graphite {
   HitachiPFM2Graphite(String cfgFile='config.groovy') {
     cfg = readConfigFile(cfgFile)
     Attributes manifest = getManifestInfo()
+    mc = new MetricClient(cfg.graphite.host,cfg.graphite.port,cfg?.graphite?.protocol,cfg?.graphite?.prefix)
+
     loadParserCfg()
     log.info "Initialization ${this.class.name}: Version: ${manifest?.getValue('Specification-Version')} / Built-Date: ${manifest?.getValue('Built-Date')}"
   }
@@ -45,6 +49,7 @@ class HitachiPFM2Graphite {
   /**
    * Load configuration settings
    *
+   * @param cfgFile String with the path of the config file
    * @return ConfigObject with the configuration elements
    */
   ConfigObject readConfigFile(String cfgFile) {
@@ -52,8 +57,6 @@ class HitachiPFM2Graphite {
       ConfigObject cfg = new ConfigSlurper().parse(new File(cfgFile).toURL())
       if (cfg) {
         log.trace "The configuration files: ${cfgFile} was read correctly"
-        // Default config
-        cfg.nnm.collect_metrics = cfg.nnm.collect_metrics ?: ['All']
         return cfg
       } else {
         log.error "Verify the content of the configuration file: ${cfgFile}"
@@ -342,7 +345,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|Port/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Port}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Port}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -352,7 +355,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|RG/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.RG}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.RG}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -362,7 +365,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|DP Pool/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.'DP Pool'}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.'DP Pool'}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -372,7 +375,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|LU/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.LU}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.LU}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -383,9 +386,9 @@ class HitachiPFM2Graphite {
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
               if (metric.containsKey('Partition')) {
-                metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.Partition.${metric.Partition}.${mname} ${field.value} ${mtimes}\n"
+                metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.Partition.${metric.Partition}.${mname} ${field.value} ${mtimes}\n"
               } else {
-                metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${mname} ${field.value} ${mtimes}\n"
+                metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${mname} ${field.value} ${mtimes}\n"
               }
             }
           }
@@ -397,9 +400,9 @@ class HitachiPFM2Graphite {
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
               if (metric.containsKey('Core')) {
-                metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.Core.${metric.Core}.${mname} ${field.value} ${mtimes}\n"
+                metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.Core.${metric.Core}.${mname} ${field.value} ${mtimes}\n"
               } else {
-                metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${mname} ${field.value} ${mtimes}\n"
+                metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${mname} ${field.value} ${mtimes}\n"
               }
             }
           }
@@ -410,7 +413,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|Unit|HDU/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Unit}.${metric.HDU}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Unit}.${metric.HDU}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -420,7 +423,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|Unit|HDU/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Unit}.${metric.HDU}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Unit}.${metric.HDU}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -430,7 +433,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|Path/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Path}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Path}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -440,7 +443,7 @@ class HitachiPFM2Graphite {
               if (field.key =~ /CTL|Core|DP Pool/) { return }
               if (cfg?.pfm?.ignoreZeroValues && !field?.value?.toInteger()) { return }
               String mname = normalizeMetricName(field.key)
-              metricList << "${cfg?.graphite?.prefix}.${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Core}.${metric.'DP Pool'}.${mname} ${field.value} ${mtimes}\n"
+              metricList << "${data['sn']}.${sectionName.replaceAll(~/[\s\.]/, '')}.${metric.CTL}.${metric.Core}.${metric.'DP Pool'}.${mname} ${field.value} ${mtimes}\n"
             }
           }
         break
@@ -503,60 +506,6 @@ class HitachiPFM2Graphite {
       break
     }
   }
-
-
-
-
-
-  /**
-   * Send Traffic Source metrics to the Graphite server
-   *
-   * @param metrics Interfaces Metric data structure
-   */
-  void send2Graphite(ArrayList metrics) {
-    if (!metrics) { return }
-
-    Date timeStart = new Date()
-    int sentCount = 0
-    def socket = null
-
-    log.debug "Sending Metrics to Graphite (${cfg?.graphite?.host}:${cfg?.graphite?.port}) using '${cfg?.graphite.protocol}'"
-
-    try {
-      if (cfg?.graphite?.protocol?.toLowerCase() == 'tcp'){
-        socket = new Socket(cfg?.graphite?.host, cfg?.graphite?.port)
-        socket.setSoTimeout(10000)
-      } else {
-        socket = new DatagramSocket()
-        socket.setSoTimeout(10000)
-      }
-
-      // Send metrics
-      metrics.each { String msg ->
-        if (cfg?.graphite?.protocol?.toLowerCase() == 'tcp') {
-          Writer writer = new OutputStreamWriter(socket.getOutputStream())
-          writer.write(msg)
-          writer.flush()
-        } else {
-          byte[] bytes = msg.getBytes()
-          InetAddress addr = InetAddress.getByName(cfg?.graphite?.host)
-          DatagramPacket packet = new DatagramPacket(bytes, bytes.length, addr, cfg?.graphite?.port)
-          socket.send(packet)
-        }
-        sentCount++
-      }
-
-    } catch (Exception e) {
-      StackTraceUtils.deepSanitize(e)
-      log.error "Socket exception: ${getStackTrace(e)}"
-    } finally {
-      socket?.close()
-    }
-
-    Date timeEnd = new Date()
-    log.info "Finished sending: ${sentCount} Metrics to Graphite in ${TimeCategory.minus(timeEnd, timeStart)}"
-  }
-
 
 
   /**
@@ -644,10 +593,16 @@ class HitachiPFM2Graphite {
     GParsPool.withPool() {
       log.info "+ Start Parsing ${files.size} PFM Metric files in parallel using ${PoolUtils.retrieveDefaultPoolSize()} Threads (PoolSize)"
       files.eachParallel { String file ->
-        try{
+        try {
           Map metric = parsePMF(file)
           ArrayList metricList = buildMetrics(metric)
-          send2Graphite(metricList)
+
+          // Send metrics
+          if (cfg?.graphite?.mode == 'pickle') {
+            mc.send2GraphitePickle(metricList)
+          } else {
+            mc.send2Graphite(metricList)
+          }
 
           if (cfg?.pfm?.metrics_archive) {
             archiveMetricFiles(cfg?.pfm?.metrics_archive,[file])
@@ -655,7 +610,7 @@ class HitachiPFM2Graphite {
             cleanMetricFiles([file])
           }
 
-        }catch(Exception e){
+        } catch(Exception e) {
           StackTraceUtils.deepSanitize(e)
           log.error "Error processing file: ${file} : ${getStackTrace(e)}"
         }

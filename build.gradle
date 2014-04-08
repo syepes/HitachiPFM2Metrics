@@ -6,7 +6,7 @@ description = "$projectName - Hitachi PFM file parser"
 group = 'com.allthingsmonitoring.hitachi.HitachiPFM2Graphite' // Class name
 archivesBaseName = 'HitachiPFM2Graphite'
 distsDirName = 'dist'
-version = '1.0'
+version = '1.1'
 
 def authorString = 'Sebastian YEPES FERNANDEZ (syepes@gmail.com)'
 def copyrightString = 'Copyright &#169; 2014 &#8211; Sebastian YEPES FERNANDEZ All Rights Reserved.'
@@ -41,7 +41,7 @@ repositories {
 }
 
 dependencies {
-  compile 'org.codehaus.groovy:groovy:2.+',
+  compile 'org.codehaus.groovy:groovy:2.2.+',
           'org.codehaus.gpars:gpars:1.+',
           'org.codehaus.jsr166-mirror:jsr166y:1.7.+',
           'org.slf4j:slf4j-api:1.7.+',

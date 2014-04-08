@@ -64,8 +64,8 @@ class HitachiPFM2GraphiteTest extends Specification{
         then:
         metricList.size() == 10886
 
-        metricList[0] == 'SAN.93050062.Port.0.A.IORate_IOPS 395 1395413715\n'
-        metricList[-1] == 'SAN.93050062.ManagementArea.1.Y.0.Access_CNT 0 1395413715\n'
+        metricList[0] == '93050062.Port.0.A.IORate_IOPS 395 1395413715\n'
+        metricList[-1] == '93050062.ManagementArea.1.Y.0.Access_CNT 0 1395413715\n'
     }
     def "Test buildMetrics : ignoreZeroValues = true"() {
         when:
@@ -75,8 +75,8 @@ class HitachiPFM2GraphiteTest extends Specification{
         then:
         metricList.size() == 1982
 
-        metricList[0] == 'SAN.93050062.Port.0.A.IORate_IOPS 395 1395413715\n'
-        metricList[-1] == 'SAN.93050062.Backend.1.3.VerifyCMD_CNT 840 1395413715\n'
+        metricList[0] == '93050062.Port.0.A.IORate_IOPS 395 1395413715\n'
+        metricList[-1] == '93050062.Backend.1.3.VerifyCMD_CNT 840 1395413715\n'
     }
     def "Test buildMetrics : Dump&Read Metrics"() {
         when:
@@ -88,6 +88,6 @@ class HitachiPFM2GraphiteTest extends Specification{
         then:
         metricDump.size() == 8123
 
-        metricDump[-1] == 'SAN.93050089.Backend.1.3.VerifyCMD_CNT 840 1395675028'
+        metricDump[-1] == '93050089.Backend.1.3.VerifyCMD_CNT 840 1395675028'
     }
 }
