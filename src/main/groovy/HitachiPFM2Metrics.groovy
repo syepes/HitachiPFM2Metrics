@@ -26,7 +26,7 @@ import com.allthingsmonitoring.utils.MetricClient
 
 
 @Slf4j
-class HitachiPFM2Graphite {
+class HitachiPFM2Metrics {
 
   ConfigObject cfg
   MetricClient mc
@@ -36,13 +36,13 @@ class HitachiPFM2Graphite {
   /**
    * Constructor
    */
-  HitachiPFM2Graphite(String cfgFile='config.groovy') {
+  HitachiPFM2Metrics(String cfgFile='config.groovy') {
     cfg = readConfigFile(cfgFile)
     Attributes manifest = getManifestInfo()
-    mc = new MetricClient(cfg.graphite.host,cfg.graphite.port,cfg?.graphite?.protocol,cfg?.graphite?.prefix)
+    log.info "Initialization ${this.class.name?.split('\\.')?.getAt(-1)}: Version: ${manifest?.getValue('Specification-Version')} / Built-Date: ${manifest?.getValue('Built-Date')}"
 
     loadParserCfg()
-    log.info "Initialization ${this.class.name}: Version: ${manifest?.getValue('Specification-Version')} / Built-Date: ${manifest?.getValue('Built-Date')}"
+    mc = new MetricClient(cfg.graphite.host,cfg.graphite.port,cfg?.graphite?.protocol,cfg?.graphite?.prefix)
   }
 
 
@@ -67,8 +67,9 @@ class HitachiPFM2Graphite {
       throw new RuntimeException("The configuration file: ${cfgFile} was not found")
     } catch(Exception e) {
       StackTraceUtils.deepSanitize(e)
-      log.error "Configuration file exception: ${getStackTrace(e)}"
-      throw new RuntimeException("Configuration file exception:\n${getStackTrace(e)}")
+      log.error "Configuration file exception: ${e?.message}"
+      log.debug "Configuration file exception: ${getStackTrace(e)}"
+      throw new RuntimeException("Configuration file exception: ${e?.message}")
     }
   }
 
@@ -91,14 +92,15 @@ class HitachiPFM2Graphite {
       manifest = new Manifest(new URL(manifestPath).openStream())
     } catch(Exception e) {
       StackTraceUtils.deepSanitize(e)
-      log.warn "Manifest: ${getStackTrace(e)}"
+      log.warn "Manifest: ${e?.message}"
+      log.debug "Manifest: ${getStackTrace(e)}"
     }
 
     return manifest.getMainAttributes()
   }
 
   // Gets the StackTrace and returns a string
-  String getStackTrace(Throwable t) {
+  static String getStackTrace(Throwable t) {
     StringWriter sw = new StringWriter()
     PrintWriter pw = new PrintWriter(sw, true)
     t.printStackTrace(pw)
@@ -262,7 +264,7 @@ class HitachiPFM2Graphite {
         }
 
         // Interval
-        // 2014/03/21 15:54:16 - 2014/03/21 15:55:15 - SN:93050062
+        // 2014/03/21 15:54:16 - 2014/03/21 15:55:15 - SN:01234567
         Matcher m = intervalPat.matcher(line)
         if (m.find()) {
           log.trace "Interval: S:${m?.group(1)?.trim()} -> E:${m?.group(2)?.trim()} / SN:${m?.group(3)?.trim()}"
@@ -524,7 +526,8 @@ class HitachiPFM2Graphite {
         Files.delete(file)
       } catch (Exception e) {
         StackTraceUtils.deepSanitize(e)
-        log.error "Unable to remove the file: '${file.getFileName()}' : ${getStackTrace(e)}"
+        log.error "Unable to remove the file: '${file.getFileName()}' : ${e?.message}"
+        log.debug "Unable to remove the file: '${file.getFileName()}' : ${getStackTrace(e)}"
         notDelCount++
       }
     }
@@ -555,7 +558,8 @@ class HitachiPFM2Graphite {
            Files.createDirectories(folder)
          } catch (Exception e) {
            StackTraceUtils.deepSanitize(e)
-           log.error "Was unable to create the metric archive folder: '${folder}' : ${getStackTrace(e)}"
+           log.error "Was unable to create the metric archive folder: '${folder}' : ${e?.message}"
+           log.debug "Was unable to create the metric archive folder: '${folder}' : ${getStackTrace(e)}"
          }
        }
 
@@ -565,7 +569,8 @@ class HitachiPFM2Graphite {
           Files.createDirectories(dest)
         } catch (Exception e) {
           StackTraceUtils.deepSanitize(e)
-          log.error "Was unable to create the metric archive folder: '${dest}' : ${getStackTrace(e)}"
+          log.error "Was unable to create the metric archive folder: '${dest}' : ${e?.message}"
+          log.debug "Was unable to create the metric archive folder: '${dest}' : ${getStackTrace(e)}"
         }
       }
 
@@ -573,7 +578,8 @@ class HitachiPFM2Graphite {
         Files.move(file, dest.resolve(file.getFileName()), REPLACE_EXISTING)
       } catch (Exception e) {
         StackTraceUtils.deepSanitize(e)
-        log.error "Unable to move the file: '${file.getFileName()}' to the metric archive folder: '${dest}'! : ${getStackTrace(e)}"
+        log.error "Unable to move the file: '${file.getFileName()}' to the metric archive folder: '${dest}'! : ${e?.message}"
+        log.debug "Unable to move the file: '${file.getFileName()}' to the metric archive folder: '${dest}'! : ${getStackTrace(e)}"
         notMovedCount++
       }
     }
@@ -612,7 +618,8 @@ class HitachiPFM2Graphite {
 
         } catch(Exception e) {
           StackTraceUtils.deepSanitize(e)
-          log.error "Error processing file: ${file} : ${getStackTrace(e)}"
+          log.error "Error processing file: ${file} : ${e?.message}"
+          log.debug "Error processing file: ${file} : ${getStackTrace(e)}"
         }
       }
     }
@@ -636,8 +643,9 @@ class HitachiPFM2Graphite {
       }
     } catch (Exception e) {
       StackTraceUtils.deepSanitize(e)
-      log.error "runAsDaemon exception: ${getStackTrace(e)}"
-      throw new RuntimeException("runAsDaemon exception: ${getStackTrace(e)}")
+      log.error "runAsDaemon exception: ${e?.message}"
+      log.debug "runAsDaemon exception: ${getStackTrace(e)}"
+      throw new RuntimeException("runAsDaemon exception: ${e?.message}")
     }
   }
 
@@ -647,18 +655,16 @@ class HitachiPFM2Graphite {
    *
    */
   static main(args) {
-    HitachiPFM2Graphite main = new HitachiPFM2Graphite()
-    addShutdownHook {
-      log.info "Shuting down app..."
-    }
+    addShutdownHook { log.info "Shuting down app..." }
 
     try {
+      HitachiPFM2Metrics main = new HitachiPFM2Metrics()
       main.runAsDaemon()
 
     } catch (Exception e) {
       StackTraceUtils.deepSanitize(e)
-      log.error "Initialization exception: ${main.getStackTrace(e)}"
-      throw new RuntimeException("Initialization exception: ${main.getStackTrace(e)}")
+      log.error "Main exception: ${e?.message}"
+      log.debug "Main exception: ${getStackTrace(e)}"
     }
   }
 }

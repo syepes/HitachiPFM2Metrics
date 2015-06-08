@@ -1,15 +1,15 @@
 package com.allthingsmonitoring.hitachi
 
 import spock.lang.*
-import com.allthingsmonitoring.hitachi.HitachiPFM2Graphite
+import com.allthingsmonitoring.hitachi.HitachiPFM2Metrics
 
 
-class HitachiPFM2GraphiteTest extends Specification{
+class HitachiPFM2MetricsTest extends Specification{
 
     @Shared
-    HitachiPFM2Graphite main
+    HitachiPFM2Metrics main
     def setupSpec() {
-        main = new HitachiPFM2Graphite($/build\resources\test\config.groovy/$)
+        main = new HitachiPFM2Metrics($/build\resources\test\config.groovy/$)
     }
 
     def "Test parsePMF - Header"() {
